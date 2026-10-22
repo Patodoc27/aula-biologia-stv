@@ -120,9 +120,15 @@ header .tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 td,th{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 th{font:600 13px var(--display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-td.v{text-align:right;font:700 19px var(--display);white-space:nowrap}
-td.v.empty{font:italic 400 15px var(--body);color:var(--muted)}
-td.v.flag{color:var(--warn)}
+td.v{text-align:right;white-space:nowrap}
+td.v{font:700 19px var(--display)}
+#notas td:not(.v){padding:10px 12px}
+tr:not(.term) td.v span{display:inline-block;min-width:44px;text-align:center;border-radius:9px;padding:4px 10px}
+tr:not(.term) td.v:not(.empty):not(.flag) span{color:var(--ink);background:linear-gradient(90deg,var(--ok),var(--cyan));box-shadow:0 0 14px -4px var(--ok)}
+td.v.flag span{color:var(--ink);background:var(--warn);box-shadow:0 0 14px -4px var(--warn)}
+td.v.empty span{font:italic 400 14px var(--body);color:var(--muted);border:1px dashed var(--line);min-width:44px}
+tr.term td{font-size:19px;font-weight:700;background:var(--card2)}
+tr.term td.v{color:var(--cyan);font-size:21px}
 tr.term td{color:var(--cyan)}
 .note{font-size:15px;color:var(--muted)}
 .files{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;grid-column:1/-1}
@@ -544,6 +550,8 @@ const ITEMS=[
 ];
 const LINK={pasa:'https://patodoc27.github.io/pasapalabra-bio/',lab:'https://patodoc27.github.io/laboratorio-biomoleculas/',esc:'https://patodoc27.github.io/escape-celular/'};
 const LINKDOC={teo:'sim'};
+const SHEET={'1A':'1CHT1w187Prhec_kWN9UkPdFlmrT57I38FHL6dvFmTgU','1B':'1ROyuyQv7G0jNdzKku97w8kQ7nOd0IHHvzvphDnt8rCE'};
+let lastR=null,liveAt=0;
 (function(){
   const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
   const $=id=>document.getElementById(id);
@@ -640,29 +648,81 @@ const LINKDOC={teo:'sim'};
     $('h-name').textContent='Hola, '+first;
     $('h-course').textContent='1° '+r.c.slice(1)+' · Biología · '+pretty(ap);
     $('n-course').textContent=pretty(nom||'')+' '+pretty(ap)+' · 1° '+r.c.slice(1);
-    $('n-date').textContent=FECHA;
     // quizzes del curso
     document.querySelectorAll('[data-quiz]').forEach(a=>a.href=QUIZ[r.c][a.dataset.quiz]);
-    // estados
-    document.querySelectorAll('[data-g]').forEach(el=>{const [t,cl]=status(r.g[el.dataset.g],/^c\d/.test(el.dataset.g));el.textContent=t;el.className='state '+cl;});
-    const done=ITEMS.filter(([k])=>counts(r.g[k])).length;
-    $('m-bar').style.width=Math.round(done/ITEMS.length*100)+'%';
-    $('m-txt').textContent=done+'/'+ITEMS.length;
-    const pend=ITEMS.filter(([k])=>!counts(r.g[k])).map(([k,l])=>l.replace('Juego educativo: ','')+' (hasta el '+DUE[k]+')');
-    $('next-up').innerHTML = pend.length ? '<b>Te falta nota en:</b> '+esc(pend.join(' · '))+'.' : '<b>¡Tenés nota en todas las actividades del trimestre!</b>';
-    // tablas
-    $('tb3').innerHTML=ITEMS.map(([k,l])=>{
-      const txt=l+(DUE[k]?' <span class="hint">· hasta el '+DUE[k]+'</span>':'');
-      const lbl=LINKDOC[k]?'<a class="go" data-doc="'+LINKDOC[k]+'" href="#">'+txt+'</a>':((LINK[k]||(QUIZ[r.c]||{})[k])?'<a class="go" href="'+(LINK[k]||QUIZ[r.c][k])+'" target="_blank" rel="noopener">'+txt+'</a>':txt);
-      return row(lbl,r.g[k]);
-    }).join('')+row('Calificación del 3° término',r.g.t3,true);
-    $('tbp').innerHTML=row('1° término',r.g.t1,true)+row('2° término',r.g.t2,true);
+    lastR=r; liveAt=0;
+    paint(r,false);
     $('gate').hidden=true; $('app').hidden=false;
     show((location.hash||'').slice(1));
+    syncLive(r);
+  }
+  function paint(r,live){
+    $('n-date').textContent=live?'(en vivo desde la planilla de la profe)':FECHA;
+    document.querySelectorAll('[data-g]').forEach(el=>{const it=itemsOf(r).find(x=>x.k===el.dataset.g); const v=it?it.v:r.g[el.dataset.g]; const [t,cl]=status(v,/^c\d/.test(el.dataset.g));el.textContent=t;el.className='state '+cl;});
+    const items=itemsOf(r);
+    const done=items.filter(it=>counts(it.v)).length;
+    $('m-bar').style.width=Math.round(done/items.length*100)+'%';
+    $('m-txt').textContent=done+'/'+items.length;
+    const pend=items.filter(it=>!counts(it.v)).map(it=>it.l.replace('Juego educativo: ','')+(it.k&&DUE[it.k]?' (hasta el '+DUE[it.k]+')':''));
+    $('next-up').innerHTML = pend.length ? '<b>Te falta nota en:</b> '+esc(pend.join(' · '))+'.' : '<b>¡Tenés nota en todas las actividades del trimestre!</b>';
+    $('tb3').innerHTML=items.map(it=>{
+      const txt=it.l+(it.k&&DUE[it.k]?' <span class="hint">· hasta el '+DUE[it.k]+'</span>':'');
+      const lbl=(it.k&&LINKDOC[it.k])?'<a class="go" data-doc="'+LINKDOC[it.k]+'" href="#">'+txt+'</a>':((it.k&&(LINK[it.k]||(QUIZ[r.c]||{})[it.k]))?'<a class="go" href="'+(LINK[it.k]||QUIZ[r.c][it.k])+'" target="_blank" rel="noopener">'+txt+'</a>':txt);
+      return row(lbl,it.v);
+    }).join('')+row('Calificación del 3° término',r.g.t3,true);
+    $('tbp').innerHTML=row('1° término',r.g.t1,true)+row('2° término',r.g.t2,true);
+  }
+  const keyOf=l=>{const u=String(l).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+    if(u.includes('PASAPALABRA'))return'pasa'; if(u.includes('BIOMOLECULAS'))return'lab';
+    if(u.includes('ESCAPE'))return'esc'; if(u.includes('TEORIA'))return'teo';
+    if(u.includes('CUESTIONARIO')&&u.includes('6'))return'c6'; if(u.includes('CUESTIONARIO')&&u.includes('7'))return'c7';
+    return null;};
+  function itemsOf(r){return r.live||ITEMS.map(([k,l])=>({k,l,v:r.g[k]}));}
+  function cleanNum(v){return String(v).replace(/\.0+$/,'');}
+  function gviz(c,cb){
+    const prev=window.google&&window.google.visualization;
+    window.google={visualization:{Query:{setResponse:d=>{fin();cb(d);}}}};
+    const sc=document.createElement('script');
+    const to=setTimeout(()=>{fin();cb(null);},12000);
+    function fin(){clearTimeout(to);if(prev)window.google=prev;try{sc.remove();}catch(e){}}
+    sc.onerror=()=>{fin();cb(null);};
+    sc.src='https://docs.google.com/spreadsheets/d/'+SHEET[c]+'/gviz/tq?tqx=out:json&gid=549037318';
+    document.head.appendChild(sc);
+  }
+  function syncLive(r){
+    if(Date.now()-liveAt<45000) return;
+    liveAt=Date.now();
+    try{
+    gviz(r.c,d=>{
+      if(!d||!d.table) return;
+      const cols=d.table.cols.map((c,i)=>({l:(c.label||'').trim(),i}));
+      const iT3=cols.findIndex(c=>/^3.{0,5}TERMINO/i.test(c.l));
+      const iPerfs=cols.slice(0,iT3<0?cols.length:iT3).map((c,i)=>i).filter(i=>/PERFIL/i.test(cols[i].l));
+      const iAct=(iPerfs.length?iPerfs[iPerfs.length-1]:21)+1;
+      const actCols=(iT3<0?cols.slice(iAct):cols.slice(iAct,iT3)).filter(c=>c.l);
+      const iT1=cols.findIndex(c=>/^1.{0,5}TERMINO/i.test(c.l)), iT2=cols.findIndex(c=>/^2.{0,5}TERMINO/i.test(c.l));
+      const want=new Set(norm(String(r.n||'')));
+      for(const row_ of d.table.rows){
+        const cell=row_.c&&row_.c[1]; if(!cell||cell.v==null) continue;
+        const toks=new Set(norm(String(cell.v)));
+        if(![...want].every(t=>toks.has(t))) continue;
+        const items=[];
+        for(const c of actCols){const c0=row_.c[c.i]; const v=c0?c0.v:null;
+          if(v===null||v===undefined||v===''||v==='-'||v==='—'){items.push({k:keyOf(c.l),l:c.l,v:null});continue;}
+          items.push({k:keyOf(c.l),l:c.l,v:cleanNum(v)});}
+        if(iT3>=0){const c0=row_.c[iT3]; const v=c0?c0.v:null; if(v!==null&&v!==undefined&&v!==''&&v!=='-')r.g.t3=cleanNum(v);}
+        if(iT1>=0){const c0=row_.c[iT1]; const v=c0?c0.v:null; if(v!==null&&v!==undefined&&v!==''&&v!=='-')r.g.t1=cleanNum(v);}
+        if(iT2>=0){const c0=row_.c[iT2]; const v=c0?c0.v:null; if(v!==null&&v!==undefined&&v!==''&&v!=='-')r.g.t2=cleanNum(v);}
+        if(items.length) r.live=items;
+        if(lastR===r) paint(r,true);
+        return;
+      }
+    });
+    }catch(e){/* sin conexión: quedan las notas guardadas */}
   }
   function row(l,v,term){
     const cls=!v?'v empty':(v==='0'||v==='1')?'v flag':'v';
-    return '<tr'+(term?' class="term"':'')+'><td>'+(l.includes('<')?l:esc(l))+'</td><td class="'+cls+'">'+(v?esc(v):'Sin nota todavía')+'</td></tr>';
+    return '<tr'+(term?' class="term"':'')+'><td>'+(l.includes('<')?l:esc(l))+'</td><td class="'+cls+'"><span>'+(v?esc(v):'Sin nota todavía')+'</span></td></tr>';
   }
   // prácticos
   Object.entries(TPS).forEach(([k,tp])=>{
@@ -683,7 +743,7 @@ const LINKDOC={teo:'sim'};
     panels.forEach(p=>p.hidden=p.id!==id);
     try{history.replaceState(null,'','#'+id)}catch(e){}
   }
-  tabs.forEach(t=>t.addEventListener('click',()=>show(t.dataset.p)));
+  tabs.forEach(t=>t.addEventListener('click',()=>{show(t.dataset.p);if(t.dataset.p==='notas'&&lastR)syncLive(lastR);}));
   // sesión recordada
   (async()=>{
     try{const s=JSON.parse(store.get('aula-ingreso')||'null'); if(s){const h=await lookup(s.c,s.t); if(h) enter(h.r);}}catch(e){}
