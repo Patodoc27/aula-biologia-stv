@@ -655,7 +655,7 @@ let lastR=null,liveAt=0;
     try{
       if(!('speechSynthesis' in window)) return;
       const decir=()=>{
-        const u=new SpeechSynthesisUtterance('Hola, '+nombre+'. ¿Estás listo para aprender?');
+        const u=new SpeechSynthesisUtterance('Hola, '+nombre+'... ¿Seguimos aprendiendo?');
         const v=pickVoice(); if(v) u.voice=v;
         u.lang=(v&&v.lang)||'es-MX'; u.pitch=1.15; u.rate=1.02;
         speechSynthesis.cancel(); speechSynthesis.speak(u);
