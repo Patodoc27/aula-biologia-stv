@@ -139,6 +139,8 @@ tr.term td{color:var(--cyan)}
 .facts{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .facts b{color:var(--cyan)}
 table.eq{font-size:15px}
+#notas td a.go{color:var(--cyan);text-decoration:none;border-bottom:1px dotted var(--cyan)}
+#notas td a.go:hover{text-decoration:underline;border-bottom-style:solid}
 table.eq td,table.eq th{padding:6px 8px}
 table.eq td.num{font:700 16px var(--display)}
 table.eq tr td:last-child{color:var(--cyan)}
@@ -540,6 +542,8 @@ const ITEMS=[
   ['esc','Juego educativo: Escape celular','celula'],
   ['c7','Cuestionario Virtual N°7','celula'],
 ];
+const LINK={pasa:'https://patodoc27.github.io/pasapalabra-bio/',lab:'https://patodoc27.github.io/laboratorio-biomoleculas/',esc:'https://patodoc27.github.io/escape-celular/'};
+const LINKDOC={teo:'sim'};
 (function(){
   const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
   const $=id=>document.getElementById(id);
@@ -647,14 +651,18 @@ const ITEMS=[
     const pend=ITEMS.filter(([k])=>!counts(r.g[k])).map(([k,l])=>l.replace('Juego educativo: ','')+' (hasta el '+DUE[k]+')');
     $('next-up').innerHTML = pend.length ? '<b>Te falta nota en:</b> '+esc(pend.join(' · '))+'.' : '<b>¡Tenés nota en todas las actividades del trimestre!</b>';
     // tablas
-    $('tb3').innerHTML=ITEMS.map(([k,l])=>row(l+(DUE[k]?' <span class="hint">· hasta el '+DUE[k]+'</span>':''),r.g[k])).join('')+row('Calificación del 3° término',r.g.t3,true);
+    $('tb3').innerHTML=ITEMS.map(([k,l])=>{
+      const txt=l+(DUE[k]?' <span class="hint">· hasta el '+DUE[k]+'</span>':'');
+      const lbl=LINKDOC[k]?'<a class="go" data-doc="'+LINKDOC[k]+'" href="#">'+txt+'</a>':((LINK[k]||(QUIZ[r.c]||{})[k])?'<a class="go" href="'+(LINK[k]||QUIZ[r.c][k])+'" target="_blank" rel="noopener">'+txt+'</a>':txt);
+      return row(lbl,r.g[k]);
+    }).join('')+row('Calificación del 3° término',r.g.t3,true);
     $('tbp').innerHTML=row('1° término',r.g.t1,true)+row('2° término',r.g.t2,true);
     $('gate').hidden=true; $('app').hidden=false;
     show((location.hash||'').slice(1));
   }
   function row(l,v,term){
     const cls=!v?'v empty':(v==='0'||v==='1')?'v flag':'v';
-    return '<tr'+(term?' class="term"':'')+'><td>'+(l.includes('<span')?l:esc(l))+'</td><td class="'+cls+'">'+(v?esc(v):'Sin nota todavía')+'</td></tr>';
+    return '<tr'+(term?' class="term"':'')+'><td>'+(l.includes('<')?l:esc(l))+'</td><td class="'+cls+'">'+(v?esc(v):'Sin nota todavía')+'</td></tr>';
   }
   // prácticos
   Object.entries(TPS).forEach(([k,tp])=>{
