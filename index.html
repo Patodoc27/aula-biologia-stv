@@ -104,6 +104,8 @@ header .tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font:600 13px var(--display);color:var(--fg);background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:4px 9px;font-variant-numeric:tabular-nums}
 .reto{border:1px dashed var(--violet);border-radius:12px;padding:10px 12px;font-size:16px}
+.premio{border:1px dashed var(--warn);border-radius:12px;padding:10px 12px;font-size:16px}
+.premio b{color:var(--warn);font-family:var(--display)}
 .reto b{color:var(--cyan);font-family:var(--display)}
 .btns{display:flex;flex-wrap:wrap;gap:10px;grid-column:1/-1}
 .mission.building{border-style:dashed}
@@ -474,10 +476,13 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
               <li>Si no la sabés, decí Pasapalabra: la letra vuelve más adelante.</li>
               <li>Escribí con tildes y ñ. Si la palabra está bien pero le falta la tilde, el juego te avisa.</li>
             </ol>
+            <p class="sub">Puntaje y nota</p>
+            <div style="overflow-x:auto"><table class="eq"><thead><tr><th>Puntaje</th><th>Nota</th></tr></thead><tbody><tr class="retry"><td>0 a 59</td><td class="num">Seguí sumando</td></tr><tr><td>60 a 69</td><td class="num">6</td></tr><tr><td>70 a 79</td><td class="num">7</td></tr><tr><td>80 a 89</td><td class="num">8</td></tr><tr><td>90 a 99</td><td class="num">9</td></tr><tr><td>100 o más</td><td class="num">10</td></tr></tbody></table></div>
           </div>
           <div class="side">
             <div class="chips"><span class="chip">25 letras</span><span class="chip">Nunca se repite el rosco</span></div>
             <p class="reto"><b>Reto:</b> cerrá el rosco antes de que termine el tiempo y entrá al ranking "Mejores del cole".</p>
+            <p class="premio"><b>Premio:</b> los 6 mejores de 1° A y 1° B se llevan un 10 extra.</p>
           </div>
           <div class="btns"><a class="btn" href="https://patodoc27.github.io/pasapalabra-bio/" target="_blank" rel="noopener">Jugar Pasapalabra</a></div>
         </div>
@@ -630,10 +635,35 @@ let lastR=null,liveAt=0;
       if(!hit){msg.textContent='No encontramos ese nombre en 1° '+course.slice(1)+'. Revisá la escritura y que el curso sea el correcto (alcanza con un apellido y un nombre). Si sigue sin funcionar, avisale a la profe.';return;}
       store.set('aula-ingreso',JSON.stringify({c:course,t:hit.ts}));
       enter(r);
+      const __np=String(r.n||'').split(','),nom=__np.slice(1).join(',').trim();
+      saludar(pretty((nom||'').split(/\s+/)[0]||pretty(__np[0]||'')));
+      store.set('aula-saludo',new Date().toDateString());
     }catch(err){msg.textContent='Este navegador no pudo abrir el aula. Probá con Chrome o con otro navegador actualizado.';}
   });
   $('logout').addEventListener('click',()=>{store.del('aula-ingreso');$('app').hidden=true;$('gate').hidden=false;$('q-name').value='';pick(null);window.scrollTo(0,0);});
 
+  // ---- voz de bienvenida ----
+  function pickVoice(){
+    if(!('speechSynthesis' in window)) return null;
+    const vs=speechSynthesis.getVoices();
+    const fem=/female|mujer|paulina|monica|m[oó]nica|sabina|renata|mia|camila|dalia|dalia|angelica|beatriz|carlota|lucia|soledad|ximena|esperanza|candelaria|catriona|elsa|lola|paola|paloma|rita|rosa|salome|sofia|sofía|yolanda|zuri|fabiola|linda|helena|karla|leticia|marina|valentina/i;
+    const mx=vs.filter(v=>/^es[-_]MX/i.test(v.lang));
+    const es=vs.filter(v=>/^es/i.test(v.lang));
+    return mx.find(v=>fem.test(v.name))||mx[0]||es.find(v=>fem.test(v.name))||es[0]||null;
+  }
+  function saludar(nombre){
+    try{
+      if(!('speechSynthesis' in window)) return;
+      const decir=()=>{
+        const u=new SpeechSynthesisUtterance('Hola, '+nombre+'. ¿Estás listo para aprender?');
+        const v=pickVoice(); if(v) u.voice=v;
+        u.lang=(v&&v.lang)||'es-MX'; u.pitch=1.15; u.rate=1.02;
+        speechSynthesis.cancel(); speechSynthesis.speak(u);
+      };
+      if(speechSynthesis.getVoices().length) decir();
+      else speechSynthesis.addEventListener('voiceschanged',decir,{once:true});
+    }catch(e){}
+  }
   // ---- aula ----
   function status(v,isQ){
     if(!v) return ['Sin nota todavía',''];
@@ -746,7 +776,13 @@ let lastR=null,liveAt=0;
   tabs.forEach(t=>t.addEventListener('click',()=>{show(t.dataset.p);if(t.dataset.p==='notas'&&lastR)syncLive(lastR);}));
   // sesión recordada
   (async()=>{
-    try{const s=JSON.parse(store.get('aula-ingreso')||'null'); if(s){const h=await lookup(s.c,s.t); if(h) enter(h.r);}}catch(e){}
+    try{const s=JSON.parse(store.get('aula-ingreso')||'null'); if(s){const h=await lookup(s.c,s.t); if(h){enter(h.r);
+      if(store.get('aula-saludo')!==new Date().toDateString()){
+        const __np=String(h.r.n||'').split(','),nom=__np.slice(1).join(',').trim();
+        const sal=()=>{saludar(pretty((nom||'').split(/\s+/)[0]||pretty(__np[0]||'')));store.set('aula-saludo',new Date().toDateString());};
+        const once=()=>{sal();window.removeEventListener('pointerdown',once);window.removeEventListener('keydown',once);};
+        window.addEventListener('pointerdown',once);window.addEventListener('keydown',once);
+      }}}}catch(e){}
   })();
 
   // visor de documentos HTML embebidos
