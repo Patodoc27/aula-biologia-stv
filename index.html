@@ -725,12 +725,14 @@ let lastR=null,liveAt=0;
     try{
     gviz(r.c,d=>{
       if(!d||!d.table) return;
-      const cols=d.table.cols.map((c,i)=>({l:(c.label||'').trim(),i}));
-      const iT3=cols.findIndex(c=>/^3.{0,5}TERMINO/i.test(c.l));
-      const iPerfs=cols.slice(0,iT3<0?cols.length:iT3).map((c,i)=>i).filter(i=>/PERFIL/i.test(cols[i].l));
+      const cols=d.table.cols.map((c,i)=>{const l=(c.label||'').trim();return {l,i,u:l.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')};});
+      const stopRe=/TERMINO|TRIMESTRE|CALIF|OBSERVAC|INTENSIF|MESA|DESAPROBAD|FINAL|PERIODO/;
+      const iPerfs=cols.map((c,i)=>i).filter(i=>/PERFIL/.test(cols[i].u));
       const iAct=(iPerfs.length?iPerfs[iPerfs.length-1]:21)+1;
-      const actCols=(iT3<0?cols.slice(iAct):cols.slice(iAct,iT3)).filter(c=>c.l);
-      const iT1=cols.findIndex(c=>/^1.{0,5}TERMINO/i.test(c.l)), iT2=cols.findIndex(c=>/^2.{0,5}TERMINO/i.test(c.l));
+      const iEnd=cols.findIndex((c,i)=>i>=iAct&&stopRe.test(c.u));
+      const actCols=cols.slice(iAct,iEnd<0?undefined:iEnd).filter(c=>c.l&&!stopRe.test(c.u));
+      const iT3=iEnd>=0?iEnd:cols.findIndex(c=>/^3/.test(c.u)&&stopRe.test(c.u));
+      const iT1=cols.findIndex(c=>/^1.{0,5}TERMINO/.test(c.u)), iT2=cols.findIndex(c=>/^2.{0,5}TERMINO/.test(c.u));
       const want=new Set(norm(String(r.n||'')));
       for(const row_ of d.table.rows){
         const cell=row_.c&&row_.c[1]; if(!cell||cell.v==null) continue;
