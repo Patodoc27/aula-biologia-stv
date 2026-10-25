@@ -694,10 +694,10 @@ let lastR=null,liveAt=0;
     const done=items.filter(it=>counts(it.v)).length;
     $('m-bar').style.width=Math.round(done/items.length*100)+'%';
     $('m-txt').textContent=done+'/'+items.length;
-    const pend=items.filter(it=>!counts(it.v)).map(it=>it.l.replace('Juego educativo: ','')+(it.k&&DUE[it.k]?' (hasta el '+DUE[it.k]+')':''));
+    const pend=items.filter(it=>!counts(it.v)).map(it=>it.l.replace('Juego educativo: ',''));
     $('next-up').innerHTML = pend.length ? '<b>Te falta nota en:</b> '+esc(pend.join(' · '))+'.' : '<b>¡Tenés nota en todas las actividades del trimestre!</b>';
     $('tb3').innerHTML=items.map(it=>{
-      const txt=it.l+(it.k&&DUE[it.k]?' <span class="hint">· hasta el '+DUE[it.k]+'</span>':'');
+      const txt=it.l;
       const lbl=(it.k&&LINKDOC[it.k])?'<a class="go" data-doc="'+LINKDOC[it.k]+'" href="#">'+txt+'</a>':((it.k&&(LINK[it.k]||(QUIZ[r.c]||{})[it.k]))?'<a class="go" href="'+(LINK[it.k]||QUIZ[r.c][it.k])+'" target="_blank" rel="noopener">'+txt+'</a>':txt);
       return row(lbl,it.v);
     }).join('')+row('Calificación del 3° término',r.g.t3,true);
