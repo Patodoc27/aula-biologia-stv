@@ -427,11 +427,26 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
       <h2 class="grad">Respiración celular</h2>
       <p class="lead">Lo que la planta fabrica, las células lo usan: degradan la glucosa con ayuda del oxígeno, obtienen energía y liberan dióxido de carbono y agua. Este proceso ocurre en las células de todos los seres vivos, también en las del cardón.</p>
       <div class="acts">
-        <article class="mission building compact">
-          <header><span class="kind c">En construcción</span></header>
+        <article class="mission">
+          <header><span class="kind s">Simulador</span><span class="state">Sin nota todavía</span></header>
           <div class="body">
-            <h3>Simulador de respiración celular</h3>
-            <p class="hook">Se está terminando. Cuando esté listo, aparece en esta tarjeta.</p>
+            <h3>La central secreta del cardón</h3>
+            <p class="hook">Segunda parte de la visita. El cardón fabrica glucosa en su tallo verde, pero ¿cómo obtienen energía todas sus células, de día y de noche, incluso en la raíz, donde nunca llega la luz? Volvé al Jardín Botánico de Altura de Tilcara y averigualo.</p>
+            <div>
+              <p class="sub">Tu misión</p>
+              <ol>
+                <li>Al entrar, decidí: ¿de dónde sacan energía las células de la raíz para trabajar?</li>
+                <li>Seguí a Lucía, la guía, por las siete estaciones: armá la receta de la fotosíntesis y descubrí qué necesita la central de cada célula.</li>
+                <li>Buscá las mitocondrias por dentro con el microscopio y clasificá qué seres vivos respiran.</li>
+                <li>En el laboratorio del indicador, buscá la evidencia de que una planta sigue respirando aunque no reciba luz.</li>
+                <li>Revisá tu apuesta, compará fotosíntesis y respiración en la misma planta y hacé el cuestionario final.</li>
+              </ol>
+            </div>
+            <div class="side">
+              <div class="chips"><span class="chip">7 estaciones</span><span class="chip">80 minutos</span><span class="chip">Cuestionario final</span></div>
+              <p class="reto"><b>Reto:</b> al final, revisá tu apuesta de entrada con todo lo que viste. ¿De dónde sale la energía de la raíz?</p>
+            </div>
+            <div class="btns"><a class="btn" href="https://patodoc27.github.io/central-secreta-cardon/" target="_blank" rel="noopener">Entrar a la central</a></div>
           </div>
         </article>
         <div class="tp-slot" data-tp="respiracion"></div>
@@ -568,7 +583,7 @@ const ITEMS=[
   ['esc','Juego educativo: Escape celular','celula'],
   ['c7','Cuestionario Virtual N°7','celula'],
 ];
-const LINK={pasa:'https://patodoc27.github.io/pasapalabra-bio/',lab:'https://patodoc27.github.io/laboratorio-biomoleculas/',esc:'https://patodoc27.github.io/escape-celular/'};
+const LINK={pasa:'https://patodoc27.github.io/pasapalabra-bio/',lab:'https://patodoc27.github.io/laboratorio-biomoleculas/',esc:'https://patodoc27.github.io/escape-celular/',central:'https://patodoc27.github.io/central-secreta-cardon/'};
 const LINKDOC={teo:'sim'};
 const SHEET={'1A':'1CHT1w187Prhec_kWN9UkPdFlmrT57I38FHL6dvFmTgU','1B':'1ROyuyQv7G0jNdzKku97w8kQ7nOd0IHHvzvphDnt8rCE'};
 let lastR=null,liveAt=0;
@@ -720,6 +735,7 @@ let lastR=null,liveAt=0;
   const keyOf=l=>{const u=String(l).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
     if(u.includes('PASAPALABRA'))return'pasa'; if(u.includes('BIOMOLECULAS'))return'lab';
     if(u.includes('ESCAPE'))return'esc'; if(u.includes('TEORIA'))return'teo';
+    if(u.includes('CENTRAL')||u.includes('RESPIRACION'))return'central';
     if(u.includes('CUESTIONARIO')){const m=u.match(/N[^0-9]{0,3}(\d)/); if(m&&m[1]==='6')return'c6'; if(m&&m[1]==='7')return'c7'; if(m&&m[1]==='8')return'foto'; if(u.includes('FOTOSINTESIS'))return'foto';}
     return null;};
   function itemsOf(r){return r.live||ITEMS.map(([k,l])=>({k,l,v:r.g[k]}));}
