@@ -449,6 +449,27 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
             <div class="btns"><a class="btn" href="https://patodoc27.github.io/central-secreta-cardon/" target="_blank" rel="noopener">Entrar a la central</a></div>
           </div>
         </article>
+        <article class="mission">
+          <header><span class="kind">Juego</span><span class="state">Sin nota todavía</span></header>
+          <div class="body">
+            <h3>Expedición Micro</h3>
+            <p class="hook">Te encogés hasta el tamaño de una molécula y recorrés dos islas: Fotosíntesis y Respiración celular. En cada una armás su ecuación: qué materia entra, qué materia sale y dónde aparece la energía.</p>
+            <div>
+              <p class="sub">Tu misión</p>
+              <ol>
+                <li>Elegí tu personaje y escribí nombre, apellido y sección: así quedás en el registro.</li>
+                <li>Recorré la Isla Respiración celular: dónde ocurre (citoplasma y mitocondrias), cuándo (de día y de noche) y qué pasa con la glucosa.</li>
+                <li>Visitá también la Isla Fotosíntesis y compará: qué entra y qué sale en cada proceso.</li>
+                <li>Juntá las 21 estrellas, respondé las preguntas y descargá o imprimí tu certificado.</li>
+              </ol>
+            </div>
+            <div class="side">
+              <div class="chips"><span class="chip">2 islas</span><span class="chip">21 estrellas</span><span class="chip">Certificado</span></div>
+              <p class="reto"><b>Reto:</b> entrá al ranking: los mejores 6 exploradores de cada curso quedan en el registro.</p>
+            </div>
+            <div class="btns"><a class="btn" href="https://patodoc27.github.io/expedicion-micro/" target="_blank" rel="noopener">Comenzar la expedición</a></div>
+          </div>
+        </article>
         <div class="tp-slot" data-tp="respiracion"></div>
       </div>
     </section>
@@ -583,7 +604,7 @@ const ITEMS=[
   ['esc','Juego educativo: Escape celular','celula'],
   ['c7','Cuestionario Virtual N°7','celula'],
 ];
-const LINK={pasa:'https://patodoc27.github.io/pasapalabra-bio/',lab:'https://patodoc27.github.io/laboratorio-biomoleculas/',esc:'https://patodoc27.github.io/escape-celular/',central:'https://patodoc27.github.io/central-secreta-cardon/'};
+const LINK={pasa:'https://patodoc27.github.io/pasapalabra-bio/',lab:'https://patodoc27.github.io/laboratorio-biomoleculas/',esc:'https://patodoc27.github.io/escape-celular/',central:'https://patodoc27.github.io/central-secreta-cardon/',exped:'https://patodoc27.github.io/expedicion-micro/'};
 const LINKDOC={teo:'sim'};
 const SHEET={'1A':'1CHT1w187Prhec_kWN9UkPdFlmrT57I38FHL6dvFmTgU','1B':'1ROyuyQv7G0jNdzKku97w8kQ7nOd0IHHvzvphDnt8rCE'};
 let lastR=null,liveAt=0;
@@ -736,6 +757,7 @@ let lastR=null,liveAt=0;
     if(u.includes('PASAPALABRA'))return'pasa'; if(u.includes('BIOMOLECULAS'))return'lab';
     if(u.includes('ESCAPE'))return'esc'; if(u.includes('TEORIA'))return'teo';
     if(u.includes('CENTRAL')||u.includes('RESPIRACION'))return'central';
+    if(u.includes('EXPEDICION'))return'exped';
     if(u.includes('CUESTIONARIO')){const m=u.match(/N[^0-9]{0,3}(\d)/); if(m&&m[1]==='6')return'c6'; if(m&&m[1]==='7')return'c7'; if(m&&m[1]==='8')return'foto'; if(u.includes('FOTOSINTESIS'))return'foto';}
     return null;};
   function itemsOf(r){return r.live||ITEMS.map(([k,l])=>({k,l,v:r.g[k]}));}
