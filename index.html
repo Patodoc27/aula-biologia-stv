@@ -470,7 +470,7 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
             <div class="btns"><a class="btn" href="https://patodoc27.github.io/expedicion-micro/" target="_blank" rel="noopener">Comenzar la expedición</a></div>
           </div>
         </article>
-        <article class="mission" id="q9" hidden>
+        <article class="mission">
           <header><span class="kind q">Cuestionario</span><span class="state" data-g="c9"></span></header>
           <div class="body">
             <h3>Cuestionario Virtual N°9</h3>
@@ -479,7 +479,7 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
             <div class="side">
               <ul class="facts">
                 <li><b>Intentos:</b> ilimitados. Si sacás 8 y querés un 10, volvé a intentarlo: queda guardada tu nota más alta.</li>
-                <li><b>Disponibilidad:</b> hasta la fecha máxima que indique la profe.</li>
+                <li><b>Disponibilidad:</b> hasta el 15 de noviembre.</li>
                 <li><b>Preguntas:</b> 20. Se aprueba a partir de 12 aciertos.</li>
               </ul>
               <p class="reto"><b>Estrategia:</b> anotá las preguntas que te generan dudas, revisá el trabajo práctico y volvé al cuestionario. Aprender es ir y volver.</p>
@@ -597,7 +597,7 @@ const NOTAS = {"9ec4156afc0878747a68512bf97e681f33e15eb496872221c449bbaee4ad2bd3
 const FECHA = "22/10/2026";
 const QUIZ = {
   "1A": {c6:"https://wordwall.net/play/120361/934/978?wwmethod=link", c7:"https://wordwall.net/play/121600/330/946?wwmethod=link", foto:"https://wordwall.net/play/122242/200/290?wwmethod=link", c9:"https://wordwall.net/play/122478/752/304?wwmethod=link"},
-  "1B": {c6:"https://wordwall.net/play/120330/220/253?wwmethod=link", c7:"https://wordwall.net/play/121603/157/690?wwmethod=link", foto:"https://wordwall.net/play/122281/065/724?wwmethod=link"}
+  "1B": {c6:"https://wordwall.net/play/120330/220/253?wwmethod=link", c7:"https://wordwall.net/play/121603/157/690?wwmethod=link", foto:"https://wordwall.net/play/122281/065/724?wwmethod=link", c9:"https://wordwall.net/play/122868/229/676?wwmethod=link"}
 };
 /* Prácticos descargables: enlace de Drive por tema (vacío = no se muestra) */
 const D=id=>"https://drive.google.com/uc?export=download&id="+id, V=id=>"https://drive.google.com/file/d/"+id+"/view";
@@ -617,7 +617,7 @@ const TPS = {
   ]},
   respiracion: null, procariota: null
 };
-const DUE={pasa:'31 de octubre',lab:'31 de octubre',c6:'31 de octubre',teo:'31 de octubre',esc:'31 de octubre',c7:'7 de noviembre'};
+const DUE={pasa:'31 de octubre',lab:'31 de octubre',c6:'31 de octubre',teo:'31 de octubre',esc:'31 de octubre',c7:'7 de noviembre',c9:'15 de noviembre'};
 const ITEMS=[
   ['pasa','Juego educativo: Pasapalabra','integradores'],
   ['lab','Juego educativo: Laboratorio de Biomoléculas','biomoleculas'],
@@ -753,7 +753,7 @@ let lastR=null,liveAt=0;
     $('n-course').textContent=pretty(nom||'')+' '+pretty(ap)+' · 1° '+r.c.slice(1);
     // quizzes del curso
     document.querySelectorAll('[data-quiz]').forEach(a=>a.href=(QUIZ[r.c]||{})[a.dataset.quiz]||'#');
-    if($('q9')) $('q9').hidden = r.c!=='1A';
+
     lastR=r; liveAt=0;
     paint(r,false);
     $('gate').hidden=true; $('app').hidden=false;
