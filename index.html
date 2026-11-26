@@ -773,7 +773,7 @@ let lastR=null,liveAt=0;
       const txt=it.l;
       const lbl=(it.k&&LINKDOC[it.k])?'<a class="go" data-doc="'+LINKDOC[it.k]+'" href="#">'+txt+'</a>':((it.k&&(LINK[it.k]||(QUIZ[r.c]||{})[it.k]))?'<a class="go" href="'+(LINK[it.k]||QUIZ[r.c][it.k])+'" target="_blank" rel="noopener">'+txt+'</a>':txt);
       return row(lbl,it.v);
-    }).join('')+row('Calificación del 3° término',r.g.t3,true);
+    }).join('');
     $('tbp').innerHTML=row('1° término',r.g.t1,true)+row('2° término',r.g.t2,true);
   }
   const keyOf=l=>{const u=String(l).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
@@ -806,7 +806,8 @@ let lastR=null,liveAt=0;
       const iPerfs=cols.map((c,i)=>i).filter(i=>/PERFIL/.test(cols[i].u));
       const iAct=(iPerfs.length?iPerfs[iPerfs.length-1]:21)+1;
       const iEnd=cols.findIndex((c,i)=>i>=iAct&&stopRe.test(c.u));
-      const actCols=cols.slice(iAct,iEnd<0?undefined:iEnd).filter(c=>c.l&&!stopRe.test(c.u));
+      const hideRe=/PROMEDIO|PONDERAD|PUNTAJE ADICIONAL|DESEMPENO VIRTUAL|MUESTRA ANUAL/;
+      const actCols=cols.slice(iAct,iEnd<0?undefined:iEnd).filter(c=>c.l&&!stopRe.test(c.u)&&!hideRe.test(c.u));
       const iT3=iEnd>=0?iEnd:cols.findIndex(c=>/^3/.test(c.u)&&stopRe.test(c.u));
       const iT1=cols.findIndex(c=>/^1.{0,5}TERMINO/.test(c.u)), iT2=cols.findIndex(c=>/^2.{0,5}TERMINO/.test(c.u));
       const want=new Set(norm(String(r.n||'')));
@@ -818,7 +819,6 @@ let lastR=null,liveAt=0;
         for(const c of actCols){const c0=row_.c[c.i]; const v=c0?c0.v:null;
           if(v===null||v===undefined||v===''||v==='-'||v==='—'){items.push({k:keyOf(c.l),l:c.l,v:null});continue;}
           items.push({k:keyOf(c.l),l:c.l,v:cleanNum(v)});}
-        if(iT3>=0){const c0=row_.c[iT3]; const v=c0?c0.v:null; if(v!==null&&v!==undefined&&v!==''&&v!=='-')r.g.t3=cleanNum(v);}
         if(iT1>=0){const c0=row_.c[iT1]; const v=c0?c0.v:null; if(v!==null&&v!==undefined&&v!==''&&v!=='-')r.g.t1=cleanNum(v);}
         if(iT2>=0){const c0=row_.c[iT2]; const v=c0?c0.v:null; if(v!==null&&v!==undefined&&v!==''&&v!=='-')r.g.t2=cleanNum(v);}
         if(items.length) r.live=items;
